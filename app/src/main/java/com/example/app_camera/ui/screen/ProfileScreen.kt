@@ -71,7 +71,6 @@ fun guardarImagenEnGaleria(context: Context, uriTemporal: Uri): Uri? {
 
         } catch (e: Exception) {
             e.printStackTrace()
-            // Si falla, borrar la entrada vacía
             resolver.delete(galeriaUri, null, null)
             return null
         }
