@@ -27,7 +27,7 @@ import android.content.ContentValues
 import android.os.Build
 import android.provider.MediaStore
 
-//Funcion para crear nuestra URI temporal
+
 fun crearImagenUri(context: Context): Uri {
     val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
     return FileProvider.getUriForFile(
@@ -37,21 +37,18 @@ fun crearImagenUri(context: Context): Uri {
     )
 }
 
-//Funcion para copiar nuestra URI temporal a la Galería den nuestro telefono
 fun guardarImagenEnGaleria(context: Context, uriTemporal: Uri): Uri? {
     val resolver = context.contentResolver
 
     val contentValues = ContentValues().apply {
         put(MediaStore.Images.Media.DISPLAY_NAME, "perfil_app_${System.currentTimeMillis()}.jpg")
         put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-        // Indicar la carpeta de fotos (Pictures)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/TuAppNombre")
             put(MediaStore.Images.Media.IS_PENDING, 1)
         }
     }
 
-    //Obtener la URI pública donde se guardará
     val galeriaUri = resolver.insert(
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
         contentValues
@@ -59,7 +56,6 @@ fun guardarImagenEnGaleria(context: Context, uriTemporal: Uri): Uri? {
 
     if (galeriaUri != null) {
         try {
-            //Copiar los datos de la URI temporal a la URI pública
             resolver.openOutputStream(galeriaUri).use { outputStream ->
                 resolver.openInputStream(uriTemporal).use { inputStream ->
                     inputStream?.copyTo(outputStream!!)
@@ -98,26 +94,22 @@ fun PerfilScreen(vm: PerfilViewModel = viewModel()) {
         vm.onImagenSeleccionada(uri)
     }
 
-    //Necesitamos un Uri temporal donde la cámara guardara la foto
     var uriCamaraTemporal by remember { mutableStateOf<Uri?>(null) }
 
     val launcherCamara = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { exito: Boolean ->
         if (exito && uriCamaraTemporal != null) {
-            //Enviar el resultado al ViewModel
             vm.onImagenSeleccionada(uriCamaraTemporal)
 
             guardarImagenEnGaleria(context, uriCamaraTemporal!!)
         }
     }
 
-    //Launcher para pedir permiso de Camara
     val launcherPermisoCamara = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { concedido: Boolean ->
         if (concedido) {
-            // Si el permiso es concedido, creamos el Uri y lanzamos la cámara
             val nuevaUri = crearImagenUri(context)
             uriCamaraTemporal = nuevaUri
             launcherCamara.launch(nuevaUri)
@@ -137,7 +129,6 @@ fun PerfilScreen(vm: PerfilViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        //Boton para Galería
         Button(onClick = {
             launcherGaleria.launch("image/*")
         }) {
@@ -146,7 +137,6 @@ fun PerfilScreen(vm: PerfilViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para Camara
         Button(onClick = {
             launcherPermisoCamara.launch(Manifest.permission.CAMERA)
         }) {
