@@ -14,13 +14,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Usa el tema de Material 3 que vino con tu proyecto
             AppCameraTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // 3. ¡Llama a tu pantalla aquí!
                     PerfilScreen()
                 }
             }
